@@ -4,7 +4,6 @@ from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
 
-
 AUTH0_DOMAIN = 'udacity-heroku.eu.auth0.com'
 ALGORITHMS = ['RS256']
 API_AUDIENCE = 'https://udacity-heroku-project.herokuapp.com/'
@@ -14,6 +13,8 @@ API_AUDIENCE = 'https://udacity-heroku-project.herokuapp.com/'
 AuthError Exception
 A standardized way to communicate auth failure modes
 '''
+
+
 class AuthError(Exception):
     def __init__(self, error, status_code):
         self.error = error
@@ -60,14 +61,14 @@ def get_token_auth_header():
         }, 401)
 
     token = parts[1]
-    #print(token)
+    # print(token)
     return token
 
 
 def verify_decode_jwt(token):
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
     jwks = json.loads(jsonurl.read())
-    #print(jwks)
+    # print(jwks)
     unverified_header = jwt.get_unverified_header(token)
     rsa_key = {}
     if 'kid' not in unverified_header:
@@ -116,9 +117,9 @@ def verify_decode_jwt(token):
                 'description': 'Unable to parse authentication token.'
             }, 400)
     raise AuthError({
-                'code': 'invalid_header',
-                'description': 'Unable to find the appropriate key.'
-            }, 400)
+        'code': 'invalid_header',
+        'description': 'Unable to find the appropriate key.'
+    }, 400)
 
 
 def check_permissions(permission, payload):
@@ -126,7 +127,6 @@ def check_permissions(permission, payload):
         abort(400)
 
     if permission not in payload['permissions']:
-        print(payload['permissions'])
         abort(403)
 
     return True
@@ -142,4 +142,5 @@ def requires_auth(permission=''):
             return f(payload, *args, **kwargs)
 
         return wrapper
+
     return requires_auth_decorator
