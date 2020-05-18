@@ -38,3 +38,5 @@ jobs:
       env: # Or as an environment variable
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         JWT_ASSISTANT: ${{ secrets.JWT_ASSISTANT }}
+        JWT_DIRECTOR: ${{ secrets.JWT_DIRECTOR }}
+        JWT_PRODUCER: ${{ secrets.JWT_PRODUCER }}
