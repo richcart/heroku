@@ -13,7 +13,7 @@ def create_app(test_config=None):
 
     @app.route('/', methods=['GET'])
     def welcome_page():
-        return 'Nothing to see here!'
+        return 'Nothing to see here, yet!'
 
     @app.route('/login-results', methods=['GET'])
     def redirect_from_login():
