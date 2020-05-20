@@ -40,3 +40,5 @@ jobs:
         JWT_ASSISTANT: ${{ secrets.JWT_ASSISTANT }}
         JWT_DIRECTOR: ${{ secrets.JWT_DIRECTOR }}
         JWT_PRODUCER: ${{ secrets.JWT_PRODUCER }}
+        AUTH0_DOMAIN: ${{ secrets.AUTH0_DOMAIN }}
+        API_AUDIENCE: ${{ secrets.API_AUDIENCE }}
