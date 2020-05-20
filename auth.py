@@ -1,12 +1,13 @@
+import os
 import json
 from flask import request, _request_ctx_stack, abort
 from functools import wraps
 from jose import jwt
 from urllib.request import urlopen
 
-AUTH0_DOMAIN = 'udacity-heroku.eu.auth0.com'
+AUTH0_DOMAIN = os.environ['AUTH0_DOMAIN']
 ALGORITHMS = ['RS256']
-API_AUDIENCE = 'https://udacity-heroku-project.herokuapp.com/'
+API_AUDIENCE = os.environ['API_AUDIENCE']
 
 # AuthError Exception
 '''
@@ -61,14 +62,14 @@ def get_token_auth_header():
         }, 401)
 
     token = parts[1]
-    # print(token)
+
     return token
 
 
 def verify_decode_jwt(token):
     jsonurl = urlopen(f'https://{AUTH0_DOMAIN}/.well-known/jwks.json')
     jwks = json.loads(jsonurl.read())
-    # print(jwks)
+    #print(jwks)
     unverified_header = jwt.get_unverified_header(token)
     rsa_key = {}
     if 'kid' not in unverified_header:
@@ -95,7 +96,6 @@ def verify_decode_jwt(token):
                 audience=API_AUDIENCE,
                 issuer='https://' + AUTH0_DOMAIN + '/'
             )
-
             return payload
 
         except jwt.ExpiredSignatureError:

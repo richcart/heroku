@@ -76,13 +76,13 @@ def create_app(test_config=None):
 
         actor = Actor.query.get_or_404(id)
 
-        if (data.name):
+        if data.name:
             actor.name = data.name
 
-        if (data.age):
+        if data.age:
             actor.age = data.age
 
-        if (data.gender):
+        if data.gender:
             actor.gender = data.gender
 
         actor.update()
@@ -128,6 +128,49 @@ def create_app(test_config=None):
             'success': True
         })
 
+    @app.route('/movies/<int:id>', methods=['DELETE'])
+    @requires_auth('delete:movies')
+    def delete_movie(payload, id):
+        movie = Movie.query.get_or_404(id)
+        movie.delete()
+        return jsonify({
+            'success': True,
+            'deleted_id': id
+        })
+
+    @app.route('/movies/<int:id>', methods=['PATCH'])
+    @requires_auth('update:movies')
+    def update_movie(payload, id):
+        if request.data:
+            data = request.get_json()
+        else:
+            abort(424)
+
+        movie = Movie.query.get_or_404(id)
+
+        if data.title:
+            movie.title = data.title
+
+        if data.release_date:
+            movie.release_date = data.release_date
+
+        movie.update()
+
+        return jsonify({
+            'success': True,
+            'actor': movie.format()
+        })
+
+    # SETTING UP ERROR HANDLING
+
+    @app.errorhandler(400)
+    def not_found_error(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "bad request"
+        }), 400
+
     @app.errorhandler(401)
     def not_authorised(error):
         return jsonify({
@@ -135,6 +178,14 @@ def create_app(test_config=None):
             "error": 401,
             "message": "not authorised"
         }), 401
+
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return jsonify({
+            "success": False,
+            "error": 404,
+            "message": "not found"
+        }), 404
 
     @app.errorhandler(AuthError)
     def handle_auth_error(ex):
