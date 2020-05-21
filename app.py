@@ -30,7 +30,10 @@ def create_app(test_config=None):
         for actor in actors:
             all_actors.append(actor.format())
 
-        return jsonify(all_actors)
+        return jsonify({
+            'success': True,
+            'actors': all_actors
+        })
 
     @app.route('/actors', methods=['POST'])
     @requires_auth('post:actors')
@@ -38,10 +41,18 @@ def create_app(test_config=None):
         if request.data:
             data = request.get_json()
         else:
-            abort(424)
+            abort(400)
 
-        if not 'name' or not 'age' or not 'gender' in data:
-            print('Something missing')
+        if not 'name' in data:
+            print('Please provide a name')
+            abort(403)
+
+        if not 'age' in data:
+            print('Please provide a age')
+            abort(403)
+
+        if not 'gender' in data:
+            print('Please provide a gender')
             abort(403)
 
         name = data['name']
@@ -52,7 +63,8 @@ def create_app(test_config=None):
         actor.insert()
 
         return jsonify({
-            'success': True
+            'success': True,
+            'actor': actor.format()
         })
 
     @app.route('/actors/<int:id>', methods=['DELETE'])
@@ -66,23 +78,27 @@ def create_app(test_config=None):
         })
 
     @app.route('/actors/<int:id>', methods=['PATCH'])
-    @requires_auth('update:actors')
+    @requires_auth('patch:actors')
     def update_actor(payload, id):
         if request.data:
             data = request.get_json()
         else:
-            abort(424)
+            abort(400)
+
+        name = data.get('name', None)
+        age = data.get('age', None)
+        gender = data.get('gender', None)
 
         actor = Actor.query.get_or_404(id)
 
-        if data.name:
-            actor.name = data.name
+        if name:
+            actor.name = name
 
-        if data.age:
-            actor.age = data.age
+        if age:
+            actor.age = age
 
-        if data.gender:
-            actor.gender = data.gender
+        if gender:
+            actor.gender = gender
 
         actor.update()
 
@@ -103,7 +119,10 @@ def create_app(test_config=None):
             all_movies.append(movie.format())
 
         print(all_movies)
-        return jsonify(all_movies)
+        return jsonify({
+            'movies': all_movies,
+            'success': True
+        })
 
     @app.route('/movies', methods=['POST'])
     @requires_auth('post:movies')
@@ -111,10 +130,14 @@ def create_app(test_config=None):
         if request.data:
             data = request.get_json()
         else:
-            abort(424)
+            abort(400)
 
-        if not 'title' or not 'release_date' in data:
-            print('Something missing')
+        if not 'title' in data:
+            print('Please provide a title')
+            abort(403)
+
+        if not 'release_date' in data:
+            print('Please provide a release date')
             abort(403)
 
         title = data['title']
@@ -124,7 +147,8 @@ def create_app(test_config=None):
         movie.insert()
 
         return jsonify({
-            'success': True
+            'success': True,
+            'movie': movie.format()
         })
 
     @app.route('/movies/<int:id>', methods=['DELETE'])
@@ -138,26 +162,29 @@ def create_app(test_config=None):
         })
 
     @app.route('/movies/<int:id>', methods=['PATCH'])
-    @requires_auth('update:movies')
+    @requires_auth('patch:movies')
     def update_movie(payload, id):
         if request.data:
             data = request.get_json()
         else:
-            abort(424)
+            abort(400)
 
         movie = Movie.query.get_or_404(id)
 
-        if data.title:
-            movie.title = data.title
+        title = data.get('title', None)
+        release_date = data.get('release_date', None)
 
-        if data.release_date:
-            movie.release_date = data.release_date
+        if title:
+            movie.title = title
+
+        if release_date:
+            movie.release_date = release_date
 
         movie.update()
 
         return jsonify({
             'success': True,
-            'actor': movie.format()
+            'movie': movie.format()
         })
 
     # SETTING UP ERROR HANDLING
@@ -177,6 +204,14 @@ def create_app(test_config=None):
             "error": 401,
             "message": "not authorised"
         }), 401
+
+    @app.errorhandler(403)
+    def not_found_error(error):
+        return jsonify({
+            "success": False,
+            "error": 403,
+            "message": "not authorsied"
+        }), 403
 
     @app.errorhandler(404)
     def not_found_error(error):
